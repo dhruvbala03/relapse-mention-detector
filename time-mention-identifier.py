@@ -4,7 +4,7 @@ from textblob import TextBlob
 from spellchecker import SpellChecker
 import nltk
 
-TIME_WORDS = ["year", "yr", "month", "week", "wk", "day", "night", "nite"]
+TIME_WORDS = ["year", "yr", "month", "week", "wk", "day", "night", "nite", "hour", "hr"]
 
 TIME_REGEX = "(?:" + "|".join(TIME_WORDS) + ")"
 
