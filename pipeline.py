@@ -21,15 +21,21 @@ def get_regex(df, args):
 
     df = df.groupby("author").filter(lambda x: len(x) >= 2)
 
-    # def build_regex():
-    #     return build_regex_dayxclean() + "|" + build_regex_iverelapsed() +  "|" + build_regex_xdaysclean()
+
     def build_regex():
-        # order: SELF then RELAPSE
-        regex_str = ''.join([
-            '.{0,50}', SELF_REGEX, '.{0,10}', RELAPSE_REGEX, '.{0,50}'
-        ])
+        regex_str = '(?:' + '|'.join([
+            build_regex_dayxclean(), build_regex_iverelapsed(), build_regex_xdaysclean()
+        ]) + ')'
 
         return "(" + regex_str + ")"
+        
+    # def build_regex():
+    #     # order: SELF then RELAPSE
+    #     regex_str = ''.join([
+    #         '.{0,50}', SELF_REGEX, '.{0,10}', RELAPSE_REGEX, '.{0,50}'
+    #     ])
+
+    #     return "(" + regex_str + ")"
 
     regex = build_regex()
     print(regex)

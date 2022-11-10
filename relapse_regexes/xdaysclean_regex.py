@@ -2,7 +2,7 @@
 
 #regular expression - follows the format "X days clean"
 
-DATE_REGEX = '(^a(?=\s)|one|two|three|four|five|six|seven|eight|nine|ten|           eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|           eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|           ninety|hundred|thousand|[0-9]+)'
+DATE_REGEX = '(^a(?=\s)|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|[0-9]+)'
 
 TIME_REGEXES = [
 "day",
