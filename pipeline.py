@@ -8,11 +8,16 @@ import matplotlib.pyplot as plt
 from relapse_regexes.dayxclean_regex import *
 from relapse_regexes.iverelapsed_regex import *
 from relapse_regexes.xdaysclean_regex import *
+from time_mention_identifier import get_surrounding_context
 
 
 # Install all relevant libraries including SUTime.
 # SUTime installation instructions: https://github.com/FraBle/python-sutime
-def get_regex(df, args):
+
+MAX_NUM_MATCHES = 5
+
+# n is the number of match columns
+def get_regex(df, args):  # TODO: see line 114
     # pass in as many parameters as needed ex. title and text for a post
     print('Matching regex expressions...')
     df['fulltext'] = ''
@@ -22,27 +27,50 @@ def get_regex(df, args):
     df = df.groupby("author").filter(lambda x: len(x) >= 2)
 
 
-    def build_regex():
-        regex_str = '(?:' + '|'.join([
-            build_regex_dayxclean(), build_regex_iverelapsed(), build_regex_xdaysclean()
-        ]) + ')'
-
-        return "(" + regex_str + ")"
-        
     # def build_regex():
-    #     # order: SELF then RELAPSE
-    #     regex_str = ''.join([
-    #         '.{0,50}', SELF_REGEX, '.{0,10}', RELAPSE_REGEX, '.{0,50}'
+    #     regex_str = '|'.join([
+    #         build_regex_dayxclean(), build_regex_iverelapsed(), build_regex_xdaysclean()
     #     ])
 
-    #     return "(" + regex_str + ")"
+    #     return regex_str
+    
 
-    regex = build_regex()
-    print(regex)
-    df['regexmatch'] = df.fulltext.astype(str).str.extract(regex, flags=re.IGNORECASE, expand=False)
-    result = df[~df['regexmatch'].isna()]
+    # regex = build_regex()
+
+    regex = "(?:(?:day|days|week|weeks|wk|wks|month|months|hour|hours|hr|hrs).{1,5}(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|[0-9]+).{1,5}(?:clean\s*|sober\s*|off))|(?:(?:I\s*|i\s*|I'*ve\s*|i'*ve\s*|i'*m\s*).{0,10}relaps(?:ed|ing)\s*)|(?:(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|[0-9]+).{1,5}(?:day|days|week|weeks|wk|wks|month|months|hour|hours|hr|hrs).{1,5}(?:clean\s*|sober\s*))"
+
+    MAX_NUM_MATCHES = 5  # number of matches to display
+    posts = df['fulltext'].tolist()
+
+    matcheslist = []  # list of matches list for each post
+    matchCounts = [] # list of booleans indicating whether post has matches
+
+    for post in posts:
+        matches = re.finditer(regex, str(post))
+        matches = [ get_surrounding_context(post, match, 3) for match in matches ]
+        l = len(matches)
+        matchCounts.append(l)
+        if l < MAX_NUM_MATCHES:
+            matches.extend(['' for i in range(0,MAX_NUM_MATCHES-l)])
+        else:
+            matches = matches[0:MAX_NUM_MATCHES]
+        matcheslist.append(matches)
+
+    df['num_matches'] = pd.Series(matchCounts)
+
+    # filter out posts that don't have any matches
+    df = df.loc[df['num_matches'] > 0]
+
+    # want a list of columns 'regexmatch_i' for i from 0 to MAX_NUM_MATCHES
+    regexmatch_columns = [ [matcheslist[r][c] for r in range(0,len(matcheslist))] for c in range(0,MAX_NUM_MATCHES) ]
+
+    for i in range(0,len(regexmatch_columns)):
+        df['regexmatch_'+str(i)] = pd.Series(regexmatch_columns[i])
+    
+    df.to_csv("regex-matches.csv")
+
     print('Regex Expressions matched.')
-    return result
+    return df
 
 
 def extract_data(df):
@@ -91,7 +119,7 @@ def get_windows(file, *args):
     df = df[df.author != "[deleted]"]
 
     # gathering relapse disclosure posts using regular expressions.
-    regex_df = get_regex(df, args)
+    regex_df = get_regex(df, args)  # TODO: how should I integrate multiple series?
 
     print('Parsing Matches for time expressions...')
     sutime = SUTime(mark_time_ranges=False, include_range=False)
@@ -104,7 +132,7 @@ def get_windows(file, *args):
         exclude = ['SET', 'DURATION', 'PAST_REF', 'PRESENT_REF']
         # The results of Type, Duration, and Set are being excluded as well as dates of the generic type PAST_REF and
         # PRESENT_REF.
-        temporals = sutime.parse(text, refDate)
+        temporals = sutime.parse(str(text), refDate)
         for i in temporals:
             # Returning the first time expression of type date.
             if i['type'] not in exclude and i['value'] not in exclude:
@@ -115,12 +143,37 @@ def get_windows(file, *args):
     regex_df['postDate'] = regex_df['created_utc'].apply(getdate)
 
     # Passing the text and post date value into a function that calls SUTime parsing.
-    regex_df['sutime_results'] = regex_df.apply(lambda x: getTime(x['postDate'], x['regexmatch']), axis=1)
+    def getRegexMatchList(columnEntry):
+        if columnEntry == '':
+            return -1
+        return columnEntry.split(' ||.|| ')  # splitting by delimiter from earlier
 
-    # excluding results where no date value was found.
-    result = regex_df[~regex_df['sutime_results'].isna()]
+    def getMinTime(row):
+        matches = getRegexMatchList(row['regexmatch'])
+        if matches == -1:
+            return -1
+        times = []
+        for match in matches:
+            # print("\n\npost date: " + row['postDate'] + "\tmatch: " + match)
+            time = getTime(row['postDate'], match)
+            print(time)
+            times.append(time)
+        return 0 #min(times)
+
+
+    # for i in range(0,MAX_NUM_MATCHES):
+    #     regex_df['sutime_results'+str(i)] = regex_df.apply(lambda x: getTime(x['postDate'], x['regexmatch_'+str(i)]), axis=1)
+
+    regex_df['sutime_results'] = regex_df.apply(lambda x: (getTime(x['postDate'], x['regexmatch_0']) if x['regexmatch_0'] != '' else -1), axis=1)
+
+    regex_df.to_csv("sutime-extractions.csv")
+
+    # # excluding results where no date value was found.
+    # result = regex_df[~regex_df['sutime_results'].isna()]
 
     # calculating windows and displaying the data.
+
+    result = regex_df
 
     extract_data(result)
 

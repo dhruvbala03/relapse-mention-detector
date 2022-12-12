@@ -2,7 +2,7 @@
 
 #regular expression - follows the format "X days clean"
 
-DATE_REGEX = '(^a(?=\s)|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|[0-9]+)'
+DATE_REGEX = '(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|[0-9]+)'
 
 TIME_REGEXES = [
 "day",
@@ -25,7 +25,7 @@ CLEAN_REGEXES = [
 "sober",
 ]
 
-CLEAN_REGEX = '(?:' + '\\s|'.join(CLEAN_REGEXES) + '\\s)'
+CLEAN_REGEX = '(?:' + '\\s*|'.join(CLEAN_REGEXES) + '\\s*)'
 #be careful about the number of whitespaces around each component
 
 def build_regex_xdaysclean():
@@ -38,6 +38,6 @@ def build_regex_xdaysclean():
         CLEAN_REGEX,
     ])
 
-    return "(" + regex_str + ")"
+    return "(?:" + regex_str + ")"
 
 

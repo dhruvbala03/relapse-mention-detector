@@ -4,14 +4,14 @@
 SELF_REGEXES = [
 "I",
 "i",
-"I've",
-"i\'ve",
-"i\'m"
+"I'*ve",
+"i\'*ve",
+"i\'*m"
 ]
-SELF_REGEX = '(?:' + '\\s|'.join(SELF_REGEXES) + '\\s)'
+SELF_REGEX = '(?:' + '\\s*|'.join(SELF_REGEXES) + '\\s*)'
 #be careful about the number of whitespaces around each component
 
-RELAPSE_REGEX = 'relaps(?:ed|ing)' + '\\s'
+RELAPSE_REGEX = 'relaps(?:ed|ing)' + '\\s*'
 
 def build_regex_iverelapsed():
     '''
@@ -24,7 +24,7 @@ def build_regex_iverelapsed():
         RELAPSE_REGEX,
     ])
 
-    return "(" + regex_str + ")"
+    return "(?:" + regex_str + ")"
 
 
 

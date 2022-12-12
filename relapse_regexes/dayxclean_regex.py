@@ -16,7 +16,7 @@ TIME_REGEXES = [
 ]
 TIME_REGEX = '(?:' + '|'.join(TIME_REGEXES) + ')'
 
-DATE_REGEX = '(^a(?=\s)|one|two|three|four|five|six|seven|eight|nine|ten|           eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|           eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|           ninety|hundred|thousand|[0-9]+)'
+DATE_REGEX = '(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|[0-9]+)'
 
 
 CLEAN_REGEXES = [
@@ -25,7 +25,7 @@ CLEAN_REGEXES = [
 "off"
 ]
 
-CLEAN_REGEX = '(?:' + '\\s|'.join(CLEAN_REGEXES) + ')'
+CLEAN_REGEX = '(?:' + '\\s*|'.join(CLEAN_REGEXES) + ')'
 
 
 #be careful about the number of whitespaces around each component
@@ -41,7 +41,7 @@ def build_regex_dayxclean():
         CLEAN_REGEX,  
     ])
 
-    return "(" + regex_str + ")"
+    return "(?:" + regex_str + ")"
 
 
 

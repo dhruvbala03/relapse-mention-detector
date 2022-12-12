@@ -52,45 +52,49 @@ def str_contains_any(s, list):
     return False
 
 
-# take in string
-print("\nenter source text: ")
-post = input()
-
-# extract words from post 
-blob = TextBlob(post)
-words = blob.words
-words = [word.replace("[ ]*’[ ]*", "'") for word in words]  # TODO: fix -- so as to avoid issues with weird apostrophe
-#print(" ".join(words))
-
-# spell correction 
-spell = SpellChecker()
-mistakes = spell.unknown(words)
-spell.word_frequency.load_words(TIME_WORDS) 
-words_corrected = []
-for word in words:
-    should_correct = False
-    corrected = ""
-    if word in mistakes:
-        if not str_contains_any(word, TIME_WORDS):  # ensure that we are not losing any info by falsely correcting time words
-            corrected = spell.correction(word)
-            if corrected != None:
-                should_correct = True
-    words_corrected.append(corrected if should_correct else word)
+# # take in string
+# print("\nenter source text: ")
+# post = input()
 
 
-s = " ".join(words_corrected).lower()
-print("\nspell corrected: \n" + s)
+def extract_time_mentions(post):
+    # extract words from post 
+    blob = TextBlob(post)
+    words = blob.words
+    words = [word.replace("[ ]*’[ ]*", "'") for word in words]  # TODO: fix -- so as to avoid issues with weird apostrophe
+    #print(" ".join(words))
+
+    # spell correction 
+    spell = SpellChecker()
+    mistakes = spell.unknown(words)
+    spell.word_frequency.load_words(TIME_WORDS) 
+    words_corrected = []
+    for word in words:
+        should_correct = False
+        corrected = ""
+        if word in mistakes:
+            if not str_contains_any(word, TIME_WORDS):  # ensure that we are not losing any info by falsely correcting time words
+                corrected = spell.correction(word)
+                if corrected != None:
+                    should_correct = True
+        words_corrected.append(corrected if should_correct else word)
 
 
-# find regex matches
-matches = re.finditer(TIME_REGEX, s)
+    s = " ".join(words_corrected).lower()
+    print("\nspell corrected: \n" + s)
 
-# extract context for each match
-contexts = [get_surrounding_context(s, match, CONTEXT_SCOPE_RADIUS) for match in matches]
 
-print("\nMATCHES:")
-print(contexts)
-print("\n")
+    # find regex matches
+    matches = re.finditer(TIME_REGEX, s)
+
+    # extract context for each match
+    contexts = [get_surrounding_context(s, match, CONTEXT_SCOPE_RADIUS) for match in matches]
+
+    print("\nMATCHES:")
+    print(contexts)
+    print("\n")
+
+
 
 
 
