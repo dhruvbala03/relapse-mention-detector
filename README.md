@@ -6,7 +6,7 @@ The resulting output is a new csv file (`output/relapse-dates.csv`), containing 
 
 Before running `pipeline.py`, make sure to install all necessary packages, by running the following commands in the project directory: 
 
-  `pip install pandas`,   
+  `pip install pandas`  
   `pip install dateparser`
   
   
