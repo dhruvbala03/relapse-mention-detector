@@ -1,5 +1,5 @@
 
-#regular expression - follows the format "I've relapsed"
+# regular expression - follows the format "I've relapsed"
 
 SELF_REGEXES = [
 "I",
@@ -9,7 +9,7 @@ SELF_REGEXES = [
 "i\'*m"
 ]
 SELF_REGEX = '(?:' + '\\s*|'.join(SELF_REGEXES) + '\\s*)'
-#be careful about the number of whitespaces around each component
+# be careful about the number of whitespaces around each component
 
 RELAPSE_REGEX = 'relaps(?:ed|ing)' + '\\s*'
 

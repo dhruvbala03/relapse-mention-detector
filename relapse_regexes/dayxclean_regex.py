@@ -28,7 +28,7 @@ CLEAN_REGEXES = [
 CLEAN_REGEX = '(?:' + '\\s*|'.join(CLEAN_REGEXES) + ')'
 
 
-#be careful about the number of whitespaces around each component
+# be careful about the number of whitespaces around each component
 
 def build_regex_dayxclean():
 
