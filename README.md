@@ -8,5 +8,6 @@ Before running `pipeline.py`, make sure to install all necessary packages, by ru
 
   `pip install pandas`  
   `pip install dateparser`
-  
+  `pip install shutup`
+ 
   
